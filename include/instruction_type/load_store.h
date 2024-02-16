@@ -16,10 +16,14 @@ typedef struct {
     unsigned int L      : 1;
     unsigned int RN     : 4;
     unsigned int RD     : 4;
-    unsigned int SHIFT  : 12;
+    unsigned int OFF    : 12;
 } LS_Bitfield;
 
 void LS_write(word*, LS_Bitfield);
 LS_Bitfield LS_read(const word*);
+
+word offset_imm(LS_Bitfield);
+word offset_reg(LS_Bitfield);
+word offset_scaled_reg(LS_Bitfield);
 
 #endif // LOAD_STORE_H_

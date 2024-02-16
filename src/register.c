@@ -99,7 +99,7 @@ int cmp_Proc_Mode(const void* v1, const void* v2) {
 /**
  * @brief Find Current Processor Mode.
  * 
- * @param mode inary representation of Current Mode.
+ * @param mode Binary representation of Current Mode.
  * @return Proc_Mode Current Processor Mode.
  */
 Proc_Mode curr_Proc_Mode(byte mode) {

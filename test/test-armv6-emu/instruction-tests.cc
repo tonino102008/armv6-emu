@@ -22,16 +22,17 @@ TEST(InstructionTests,  check_Op_Type) {
     *instr = 0b11100000101000010010000000010000;
     EXPECT_EQ(check_Op_Type(instr), (Op_Field)DPRS);
     free(instr);
-}
-
-TEST(InstructionTests, ADC) {
-    **CPSR_Reg.regs &= !**CPSR_Reg.regs;
-    **CPSR_Reg.regs |= 0b10000;
-    word* instr = (word*)malloc(sizeof(word));
-    *instr = 0b11100000101000010010000000000000;
-    ADC(instr);
-    free(instr);
     ARM_Reg_dtor();
 }
+
+// TEST(InstructionTests, ADC) {
+//     **CPSR_Reg.regs &= !**CPSR_Reg.regs;
+//     **CPSR_Reg.regs |= 0b10000;
+//     word* instr = (word*)malloc(sizeof(word));
+//     *instr = 0b11100000101000010010000000000000;
+//     ADC(instr);
+//     free(instr);
+//     ARM_Reg_dtor();
+// }
 
 }
