@@ -28,4 +28,7 @@ LS_Mul_Bitfield LS_Mul_read(const word*);
 Addr_Result incr_decr(LS_Mul_Bitfield);
 byte no_set_bits(hword);
 
+void LDM(LS_Mul_Bitfield, Addr_Result); // TRIPLE IMPLEMENTATION
+void STM(LS_Mul_Bitfield, Addr_Result); // DOUBLE IMPLEMENTATION
+
 #endif // LOAD_STORE_MUL_H_

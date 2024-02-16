@@ -11,3 +11,7 @@ SI_Bitfield SI_read(const word* instr) {
     bits.SWI = *instr >> 0;
     return bits;
 }
+
+void SWI(SI_Bitfield) {
+    NOT_IMPLEMENTED();
+}

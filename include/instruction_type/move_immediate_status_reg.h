@@ -19,4 +19,6 @@ typedef struct {
 void MISR_write(word*, MISR_Bitfield);
 MISR_Bitfield MISR_read(const word*);
 
+void MSR(MISR_Bitfield);
+
 #endif // MOVE_IMMEDIATE_STATUS_REG_H_

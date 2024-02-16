@@ -26,4 +26,13 @@ word offset_imm(LS_Bitfield);
 word offset_reg(LS_Bitfield);
 word offset_scaled_reg(LS_Bitfield);
 
+void LDR(LS_Bitfield, word);
+void LDRB(LS_Bitfield, word);
+void LDRBT(LS_Bitfield, word);
+void LDRT(LS_Bitfield, word);
+void STR(LS_Bitfield, word);
+void STRB(LS_Bitfield, word);
+void STRBT(LS_Bitfield, word);
+void STRT(LS_Bitfield, word);
+
 #endif // LOAD_STORE_H_

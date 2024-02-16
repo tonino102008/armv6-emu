@@ -14,4 +14,6 @@ typedef struct {
 void SI_write(word*, SI_Bitfield);
 SI_Bitfield SI_read(const word*);
 
+void SWI(SI_Bitfield);
+
 #endif // SOFTWARE_INTERRUPT_H_

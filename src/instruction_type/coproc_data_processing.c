@@ -19,3 +19,7 @@ Coproc_DP_Bitfield Coproc_DP_read(const word* instr) {
     bits.CRM = *instr >> 0;
     return bits;
 }
+
+void CDP(Coproc_DP_Bitfield) {
+    NOT_IMPLEMENTED();
+}

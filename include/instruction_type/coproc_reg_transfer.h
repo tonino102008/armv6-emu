@@ -21,4 +21,7 @@ typedef struct {
 void Coproc_RT_write(word*, Coproc_RT_Bitfield);
 Coproc_RT_Bitfield Coproc_RT_read(const word*);
 
+void MCR(Coproc_RT_Bitfield);
+void MRC(Coproc_RT_Bitfield);
+
 #endif // COPROC_REG_TRANSFER_H_

@@ -20,4 +20,6 @@ typedef struct {
 void Coproc_DP_write(word*, Coproc_DP_Bitfield);
 Coproc_DP_Bitfield Coproc_DP_read(const word*);
 
+void CDP(Coproc_DP_Bitfield);
+
 #endif // COPROC_DATA_PROCESSING_H_

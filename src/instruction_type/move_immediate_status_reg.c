@@ -18,3 +18,7 @@ MISR_Bitfield MISR_read(const word* instr) {
     bits.IMM = *instr >> 0;
     return bits;
 }
+
+void MSR(MISR_Bitfield) {
+    NOT_IMPLEMENTED();
+}

@@ -1,5 +1,7 @@
 #include "data_processing.h"
 
+#include "limits.h"
+
 void Data_Proc_write(word* instr, Data_Proc_Bitfield bits) {
     *instr =    bits.SHIFT << 0     | bits.RD << 12     | bits.RN << 16 |
                 bits.S << 20        | bits.OPCODE << 21 | bits.I << 25  |
@@ -17,25 +19,6 @@ Data_Proc_Bitfield Data_Proc_read(const word* instr) {
     bits.RD = *instr >> 12;
     bits.SHIFT =  *instr >> 0;
     return bits;
-}
-
-void ADC(const word *instr) {
-    Data_Proc_Bitfield Data_bits = Data_Proc_read(instr);
-    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
-    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
-
-    if (check_Cond((Cond_Field)Data_bits.COND, CPSR_bits)) {
-        *GP_Reg[c_m].regs[Data_bits.RD] = *GP_Reg[c_m].regs[Data_bits.RN] + Data_bits.SHIFT + CPSR_bits.C;
-        if (Data_bits.S && Data_bits.RD == PC) {
-            TRY_RESTORE_SPSR();
-        } else if (Data_bits.S) {
-            CPSR_bits.N = *GP_Reg[c_m].regs[Data_bits.RD] >> 31;
-            CPSR_bits.Z = *GP_Reg[c_m].regs[Data_bits.RD] == 0 ? 1 : 0;
-            CPSR_bits.C = 0; // TO BE ADJUSTED
-            CPSR_bits.V = 0; // TO BE ADJUSTED
-            PSR_write(*CPSR_Reg.regs, CPSR_bits);
-        }
-    }
 }
 
 Shift_Result shift_32bit_imm(Data_Proc_Bitfield bits) {
@@ -205,4 +188,332 @@ Shift_Result shift_reg(Data_Proc_Bitfield bits) {
     }
 
     return out;
+}
+
+void ADC(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] + shift.shifter_operand + CPSR_bits.C;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] +
+                                    (unsigned long)shift.shifter_operand +
+                                    (unsigned long)CPSR_bits.C;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] +
+                                    (signed long)shift.shifter_operand +
+                                    (signed long)CPSR_bits.C;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void ADD(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] + shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] +
+                                    (unsigned long)shift.shifter_operand;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] +
+                                    (signed long)shift.shifter_operand;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void AND(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] & shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void BIC(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] & (!shift.shifter_operand);
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void CMN(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        word alu_out = *GP_Reg[c_m].regs[bits.RN] + shift.shifter_operand;
+        CPSR_bits.N = alu_out >> 31;
+        CPSR_bits.Z = alu_out == 0 ? 1 : 0;
+        CPSR_bits.C = 0;
+        CPSR_bits.V = 0;
+        unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] +
+                                (unsigned long)shift.shifter_operand;
+        if (alu_out != test) CPSR_bits.C = 1;
+        signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] +
+                                (signed long)shift.shifter_operand;
+        if (alu_out != test) CPSR_bits.V = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void CMP(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        word alu_out = *GP_Reg[c_m].regs[bits.RN] - shift.shifter_operand;
+        CPSR_bits.N = alu_out >> 31;
+        CPSR_bits.Z = alu_out == 0 ? 1 : 0;
+        CPSR_bits.C = 0;
+        CPSR_bits.V = 0;
+        unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] -
+                                (unsigned long)shift.shifter_operand;
+        if (alu_out != test) CPSR_bits.C = 1;
+        signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] -
+                                (signed long)shift.shifter_operand;
+        if (alu_out != test) CPSR_bits.V = 1; // CHECK NO BORROW CONDITION TO SEE IF OK
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+// void CPY(Data_Proc_Bitfield bits, Shift_Result shift) { // PARTICULAR CASE THAT FALLS IN MOV
+//     PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+//     Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+//     if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+//         assert(bits.RN == 0);
+//         *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[shift.shifter_operand];
+//     }
+// }
+
+void EOR(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] ^ shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void MOV(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void MVN(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = !shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void ORR(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] | shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = shift.shift_carry_out;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void RSB(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = shift.shifter_operand - *GP_Reg[c_m].regs[bits.RN];
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)shift.shifter_operand -
+                                    (unsigned long)*GP_Reg[c_m].regs[bits.RN];
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)shift.shifter_operand -
+                                    (signed long)*GP_Reg[c_m].regs[bits.RN];
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1; // CHECK NO BORROW CONDITION TO SEE IF OK
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void RSC(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = shift.shifter_operand - *GP_Reg[c_m].regs[bits.RN] - (!CPSR_bits.C);
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)shift.shifter_operand -
+                                    (unsigned long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (unsigned long)(!CPSR_bits.C);
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)shift.shifter_operand -
+                                    (signed long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (signed long)(!CPSR_bits.C);
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1; // CHECK NO BORROW CONDITION TO SEE IF OK
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void SBC(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] - shift.shifter_operand - (!CPSR_bits.C);
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (unsigned long)shift.shifter_operand -
+                                    (unsigned long)(!CPSR_bits.C);
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (signed long)shift.shifter_operand -
+                                    (signed long)(!CPSR_bits.C);
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1; // CHECK NO BORROW CONDITION TO SEE IF OK
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void SUB(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        *GP_Reg[c_m].regs[bits.RD] = *GP_Reg[c_m].regs[bits.RN] - shift.shifter_operand;
+        if (bits.S && bits.RD == PC) {
+            TRY_RESTORE_SPSR();
+        } else if (bits.S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.RD] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.RD] == 0 ? 1 : 0;
+            CPSR_bits.C = 0;
+            CPSR_bits.V = 0;
+            unsigned long test =    (unsigned long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (unsigned long)shift.shifter_operand;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.C = 1;
+            signed long test =      (signed long)*GP_Reg[c_m].regs[bits.RN] -
+                                    (signed long)shift.shifter_operand;
+            if (*GP_Reg[c_m].regs[bits.RD] != test) CPSR_bits.V = 1; // CHECK NO BORROW CONDITION TO SEE IF OK
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
+}
+
+void TEQ(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        word alu_out = *GP_Reg[c_m].regs[bits.RN] ^ shift.shifter_operand;
+        CPSR_bits.N = alu_out >> 31;
+        CPSR_bits.Z = alu_out == 0 ? 1 : 0;
+        CPSR_bits.C = shift.shift_carry_out;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void TST(Data_Proc_Bitfield bits, Shift_Result shift) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        word alu_out = *GP_Reg[c_m].regs[bits.RN] & shift.shifter_operand;
+        CPSR_bits.N = alu_out >> 31;
+        CPSR_bits.Z = alu_out == 0 ? 1 : 0;
+        CPSR_bits.C = shift.shift_carry_out;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
 }

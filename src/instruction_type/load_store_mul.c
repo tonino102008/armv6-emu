@@ -93,3 +93,11 @@ byte no_set_bits(hword n) {
 
     return out;
 }
+
+void LDM(LS_Mul_Bitfield, Addr_Result) { // TRIPLE IMPLEMENTATION
+    NOT_IMPLEMENTED();
+}
+
+void STM(LS_Mul_Bitfield, Addr_Result) { // DOUBLE IMPLEMENTATION
+    NOT_IMPLEMENTED();
+}

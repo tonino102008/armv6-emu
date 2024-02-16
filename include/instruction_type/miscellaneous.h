@@ -16,9 +16,25 @@ typedef struct {
     unsigned int Q_3    : 4;
     unsigned int Q_4    : 4;
     unsigned int Q_5    : 4;
-} MISC_1_Bitfield;
+} MISC_Bitfield;
 
-void MISC_1_write(word*, MISC_1_Bitfield);
-MISC_1_Bitfield MISC_1_read(const word*);
+void MISC_write(word*, MISC_Bitfield);
+MISC_Bitfield MISC_read(const word*);
+
+void BKPT(MISC_Bitfield);
+void BX(MISC_Bitfield);
+void BXJ(MISC_Bitfield);
+void CLZ(MISC_Bitfield);
+void MRS(MISC_Bitfield);
+void MSR(MISC_Bitfield);
+void QADD(MISC_Bitfield);
+void QDADD(MISC_Bitfield);
+void QDSUB(MISC_Bitfield);
+void QSUB(MISC_Bitfield);
+void SMLA(MISC_Bitfield);
+void SMLAL(MISC_Bitfield);
+void SMLAW(MISC_Bitfield);
+void SMUL(MISC_Bitfield);
+void SMULW(MISC_Bitfield);
 
 #endif // MISCELLANEOUS_H_

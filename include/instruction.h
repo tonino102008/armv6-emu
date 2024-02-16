@@ -9,11 +9,6 @@
 
 #define NOT_IMPLEMENTED() printf("Not yet implemented.\n");
 #define UNPREDICTABLE() printf("Unpredictable operation. Behaviour to be defined\n");
-#define TRY_RESTORE_SPSR()                          \
-        do {                                        \
-            if (has_SPSR()) CPSR_Reg = *SPSR_Reg;   \
-            else UNPREDICTABLE();                   \
-        } while(0)
 #define UNSUPPORTED()                           \
         do {                                    \
             printf("Unsupported operation.\n"); \

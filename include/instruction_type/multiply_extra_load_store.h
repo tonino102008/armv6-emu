@@ -28,4 +28,22 @@ MELS_Bitfield MELS_read(const word*);
 word offset_imm(MELS_Bitfield);
 word offset_reg(MELS_Bitfield);
 
+void LDRD(MELS_Bitfield, word);
+void LDREX(MELS_Bitfield, word);
+void LDRH(MELS_Bitfield, word);
+void LDRSB(MELS_Bitfield, word);
+void LDRSH(MELS_Bitfield, word);
+void MLA(MELS_Bitfield, word);
+void MUL(MELS_Bitfield, word);
+void SMLAL(MELS_Bitfield, word);
+void SMULL(MELS_Bitfield, word);
+void STRD(MELS_Bitfield, word);
+void STREX(MELS_Bitfield, word);
+void STRH(MELS_Bitfield, word);
+void SWP(MELS_Bitfield, word);
+void SWPB(MELS_Bitfield, word);
+void UMAAL(MELS_Bitfield, word);
+void UMLAL(MELS_Bitfield, word);
+void UMULL(MELS_Bitfield, word);
+
 #endif // MULTIPLY_EXTRA_LOAD_STORE_H_

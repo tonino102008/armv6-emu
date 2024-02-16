@@ -21,3 +21,11 @@ Coproc_RT_Bitfield Coproc_RT_read(const word* instr) {
     bits.CRM = *instr >> 0;
     return bits;
 }
+
+void MCR(Coproc_RT_Bitfield) {
+    NOT_IMPLEMENTED();
+}
+
+void MRC(Coproc_RT_Bitfield) {
+    NOT_IMPLEMENTED();
+}

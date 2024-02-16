@@ -104,3 +104,19 @@ Addr_Result offset_imm(Coproc_LS_Bitfield bits) {
 
     return out;
 }
+
+void LDC(Coproc_LS_Bitfield, Addr_Result) {
+    NOT_IMPLEMENTED();
+}
+
+void MCRR(Coproc_LS_Bitfield, Addr_Result) {
+    NOT_IMPLEMENTED();
+}
+
+void MRRC(Coproc_LS_Bitfield, Addr_Result) {
+    NOT_IMPLEMENTED();
+}
+
+void STC(Coproc_LS_Bitfield, Addr_Result) {
+    NOT_IMPLEMENTED();
+}

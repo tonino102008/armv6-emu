@@ -29,4 +29,9 @@ Coproc_LS_Bitfield Coproc_LS_read(const word*);
 
 Addr_Result offset_imm(Coproc_LS_Bitfield);
 
+void LDC(Coproc_LS_Bitfield, Addr_Result);
+void MCRR(Coproc_LS_Bitfield, Addr_Result);
+void MRRC(Coproc_LS_Bitfield, Addr_Result);
+void STC(Coproc_LS_Bitfield, Addr_Result);
+
 #endif // COPROC_LOAD_STORE_H_

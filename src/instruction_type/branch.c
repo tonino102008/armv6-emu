@@ -13,3 +13,11 @@ Branch_Bitfield Branch_read(const word* instr) {
     bits.OFF = *instr >> 0;
     return bits;
 }
+
+void B_BL(Branch_Bitfield bits) {
+    NOT_IMPLEMENTED();
+}
+
+void BLX(Branch_Bitfield) {
+    NOT_IMPLEMENTED();
+}

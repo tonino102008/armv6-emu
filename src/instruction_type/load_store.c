@@ -262,3 +262,35 @@ word offset_scaled_reg(LS_Bitfield bits) {
 
     return address;
 }
+
+void LDR(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRB(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRBT(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRT(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STR(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STRB(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STRBT(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STRT(LS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}

@@ -138,3 +138,71 @@ word offset_reg(MELS_Bitfield bits) {
 
     return address;
 }
+
+void LDRD(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDREX(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRH(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRSB(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void LDRSH(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void MLA(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void MUL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void SMLAL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void SMULL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STRD(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STREX(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void STRH(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void SWP(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void SWPB(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void UMAAL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void UMLAL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
+
+void UMULL(MELS_Bitfield, word) {
+    NOT_IMPLEMENTED();
+}
