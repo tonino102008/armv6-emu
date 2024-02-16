@@ -55,8 +55,6 @@ word offset_imm(LS_Bitfield bits) {
     case 0b1:
         switch (bits.P)
         {
-        case 0b0:
-            break;
         case 0b1:
             // if (bits.RN == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
             if (bits.U) address = *GP_Reg[c_m].regs[bits.RN] + bits.OFF;
@@ -111,8 +109,6 @@ word offset_reg(LS_Bitfield bits) {
     case 0b1:
         switch (bits.P)
         {
-        case 0b0:
-            break;
         case 0b1:
             // if (Rn == PC || Rm == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
             if (bits.U) address = *GP_Reg[c_m].regs[bits.RN] + *GP_Reg[c_m].regs[Rm];
@@ -222,8 +218,6 @@ word offset_scaled_reg(LS_Bitfield bits) {
     case 0b1:
         switch (bits.P)
         {
-        case 0b0:
-            break;
         case 0b1:
             // if (Rn == PC || Rm == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
             switch (op) {

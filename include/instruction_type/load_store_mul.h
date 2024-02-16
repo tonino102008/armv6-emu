@@ -17,7 +17,15 @@ typedef struct {
     unsigned int RL     : 16;
 } LS_Mul_Bitfield;
 
+typedef struct {
+    word start_address;
+    word end_address;
+} Addr_Result;
+
 void LS_Mul_write(word*, LS_Mul_Bitfield);
 LS_Mul_Bitfield LS_Mul_read(const word*);
+
+Addr_Result incr_decr(LS_Mul_Bitfield);
+byte no_set_bits(hword);
 
 #endif // LOAD_STORE_MUL_H_

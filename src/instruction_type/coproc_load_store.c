@@ -22,3 +22,85 @@ Coproc_LS_Bitfield Coproc_LS_read(const word* instr) {
     bits.OFF = *instr >> 0;
     return bits;
 }
+
+Addr_Result offset_imm(Coproc_LS_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    Addr_Result out;
+    word address;
+
+    switch (bits.W)
+    {
+    case 0b0:
+        break;
+        switch(bits.P)
+        {
+        case 0b0:
+            //if (bits.RN == PC) *GP_Reg[c_m].regs[bits.RN] += 0x8; TO BE PLACED IN THE ACTUAL OPERATION
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                out.start_address = *GP_Reg[c_m].regs[bits.RN];
+                address = out.start_address;
+                while (Coproc_sig(bits.CP_NO)) { // FUNCTION TO BE DEFINED: COMM BETWEEN CPU AND COPROCESSOR
+                    address += 4;
+                }
+                out.end_address = address;
+            }
+            break;
+        case 0b1:
+            //if (bits.RN == PC) *GP_Reg[c_m].regs[bits.RN] += 0x8; TO BE PLACED IN THE ACTUAL OPERATION
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                if (bits.U) address = *GP_Reg[c_m].regs[bits.RN] + (bits.OFF * 4);
+                else address = *GP_Reg[c_m].regs[bits.RN] - (bits.OFF * 4);
+                out.start_address = address;
+                while (Coproc_sig(bits.CP_NO)) { // FUNCTION TO BE DEFINED: COMM BETWEEN CPU AND COPROCESSOR
+                    address += 4;
+                }
+                out.end_address = address;
+            }
+            break;
+        default:
+            UNPREDICTABLE();
+            break;
+        }
+    case 0b1:
+        switch(bits.P)
+        {
+        case 0b0:
+            //if (bits.RN == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                out.start_address = *GP_Reg[c_m].regs[bits.RN];
+                if (bits.U) *GP_Reg[c_m].regs[bits.RN] += (bits.OFF * 4);
+                else *GP_Reg[c_m].regs[bits.RN] -= (bits.OFF * 4);
+                address = out.start_address;
+                while (Coproc_sig(bits.CP_NO)) { // FUNCTION TO BE DEFINED: COMM BETWEEN CPU AND COPROCESSOR
+                    address += 4;
+                }
+                out.end_address = address;
+            }
+            break;
+        case 0b1:
+            //if (bits.RN == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                if (bits.U) *GP_Reg[c_m].regs[bits.RN] += (bits.OFF * 4);
+                else *GP_Reg[c_m].regs[bits.RN] -= (bits.OFF * 4);
+                out.start_address = *GP_Reg[c_m].regs[bits.RN];
+                address = out.start_address;
+                while (Coproc_sig(bits.CP_NO)) { // FUNCTION TO BE DEFINED: COMM BETWEEN CPU AND COPROCESSOR
+                    address += 4;
+                }
+                out.end_address = address;
+            }
+            break;
+        default:
+            UNPREDICTABLE();
+            break;
+        }
+        break;
+    default:
+        UNPREDICTABLE();
+        break;
+    }
+
+    return out;
+}

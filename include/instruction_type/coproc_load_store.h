@@ -19,7 +19,14 @@ typedef struct {
     unsigned int OFF    : 8;
 } Coproc_LS_Bitfield;
 
+typedef struct {
+    word start_address;
+    word end_address;
+} Addr_Result;
+
 void Coproc_LS_write(word*, Coproc_LS_Bitfield);
 Coproc_LS_Bitfield Coproc_LS_read(const word*);
+
+Addr_Result offset_imm(Coproc_LS_Bitfield);
 
 #endif // COPROC_LOAD_STORE_H_

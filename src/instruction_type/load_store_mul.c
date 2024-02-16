@@ -19,3 +19,77 @@ LS_Mul_Bitfield LS_Mul_read(const word* instr) {
     bits.RL = *instr >> 0;
     return bits;
 }
+
+Addr_Result incr_decr(LS_Mul_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    Addr_Result out;
+
+    // PAY ATTENTION TO S AND L FLAGS TO DETERMINE IF UNPREDICTABLE()
+    // if (bits.RL == 0) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+
+    switch (bits.U)
+    {
+    case 0b0:
+        switch (bits.P)
+        {
+        case 0b0:
+            out.start_address = *GP_Reg[c_m].regs[bits.RN] - (no_set_bits(bits.RL) * 4) + 4;
+            out.end_address = *GP_Reg[c_m].regs[bits.RN];
+            if (check_Cond(bits.COND, CPSR_bits) && bits.W) {
+                *GP_Reg[c_m].regs[bits.RN] -= (no_set_bits(bits.RL) * 4);
+            }
+            break;
+        case 0b1:
+            out.start_address = *GP_Reg[c_m].regs[bits.RN] - (no_set_bits(bits.RL) * 4);
+            out.end_address = *GP_Reg[c_m].regs[bits.RN] - 4;
+            if (check_Cond(bits.COND, CPSR_bits) && bits.W) {
+                *GP_Reg[c_m].regs[bits.RN] -= (no_set_bits(bits.RL) * 4);
+            }
+            break;
+        default:
+            UNPREDICTABLE();
+            break;
+        }
+        break;
+    case 0b1:
+        switch (bits.P)
+        {
+        case 0b0:
+            out.start_address = *GP_Reg[c_m].regs[bits.RN];
+            out.end_address = *GP_Reg[c_m].regs[bits.RN] + (no_set_bits(bits.RL) * 4) - 4;
+            if (check_Cond(bits.COND, CPSR_bits) && bits.W) {
+                *GP_Reg[c_m].regs[bits.RN] += (no_set_bits(bits.RL) * 4);
+            }
+            break;
+        case 0b1:
+            out.start_address = *GP_Reg[c_m].regs[bits.RN] + 4;
+            out.end_address = *GP_Reg[c_m].regs[bits.RN] + (no_set_bits(bits.RL) * 4);
+            if (check_Cond(bits.COND, CPSR_bits) && bits.W) {
+                *GP_Reg[c_m].regs[bits.RN] += (no_set_bits(bits.RL) * 4);
+            }
+            break;
+        default:
+            UNPREDICTABLE();
+            break;
+        }
+        break;
+    default:
+        UNPREDICTABLE();
+        break;
+    }
+    
+    return out;
+}
+
+byte no_set_bits(hword n) {
+    byte out = 0;
+
+    while (n) {
+        n &= (n - 1);
+        out += 1;
+    }
+
+    return out;
+}
