@@ -60,7 +60,7 @@ Addr_Result offset_imm(Coproc_LS_Bitfield bits) {
             }
             break;
         default:
-            UNPREDICTABLE();
+            UNSUPPORTED();
             break;
         }
     case 0b1:
@@ -93,12 +93,12 @@ Addr_Result offset_imm(Coproc_LS_Bitfield bits) {
             }
             break;
         default:
-            UNPREDICTABLE();
+            UNSUPPORTED();
             break;
         }
         break;
     default:
-        UNPREDICTABLE();
+        UNSUPPORTED();
         break;
     }
 

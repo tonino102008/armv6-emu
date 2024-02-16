@@ -49,7 +49,7 @@ Addr_Result incr_decr(LS_Mul_Bitfield bits) {
             }
             break;
         default:
-            UNPREDICTABLE();
+            UNSUPPORTED();
             break;
         }
         break;
@@ -71,12 +71,12 @@ Addr_Result incr_decr(LS_Mul_Bitfield bits) {
             }
             break;
         default:
-            UNPREDICTABLE();
+            UNSUPPORTED();
             break;
         }
         break;
     default:
-        UNPREDICTABLE();
+        UNSUPPORTED();
         break;
     }
     

@@ -25,4 +25,7 @@ typedef struct {
 void MELS_write(word*, MELS_Bitfield);
 MELS_Bitfield MELS_read(const word*);
 
+word offset_imm(MELS_Bitfield);
+word offset_reg(MELS_Bitfield);
+
 #endif // MULTIPLY_EXTRA_LOAD_STORE_H_

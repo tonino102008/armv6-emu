@@ -26,3 +26,115 @@ MELS_Bitfield MELS_read(const word* instr) {
     bits.Q_4 = *instr >> 0;
     return bits;
 }
+
+word offset_imm(MELS_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    word address;
+    word offset;
+
+    switch(bits.W_A)
+    {
+    case 0b0:
+        switch(bits.P)
+        {
+        case 0b0:
+            //if (bits.RN == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            address = *GP_Reg[c_m].regs[bits.Q_1];
+            offset = (bits.Q_3 << 4) | bits.Q_4;
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                if (bits.U) *GP_Reg[c_m].regs[bits.Q_1] += offset;
+                else *GP_Reg[c_m].regs[bits.Q_1] -= offset;
+            }  
+            break;
+        case 0b1:
+            //if (bits.RN == PC) *GP_Reg[c_m].regs[bits.RN] += 0x8; TO BE PLACED IN THE ACTUAL OPERATION
+            offset = (bits.Q_3 << 4) | bits.Q_4;
+            if (bits.U) address = *GP_Reg[c_m].regs[bits.Q_1] + offset;
+            else address = *GP_Reg[c_m].regs[bits.Q_1] - offset;
+            break;
+        default:
+            UNSUPPORTED();
+            break;
+        }
+        break;
+    case 0b1:
+        switch(bits.P)
+        {
+        case 0b0:
+            break;
+        case 0b1:
+            //if (bits.RN == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            offset = (bits.Q_3 << 4) | bits.Q_4;
+            if (bits.U) address = *GP_Reg[c_m].regs[bits.Q_1] + offset;
+            else address = *GP_Reg[c_m].regs[bits.Q_1] - offset;
+            if (check_Cond(bits.COND, CPSR_bits)) *GP_Reg[c_m].regs[bits.Q_1] = address;
+            break;
+        default:
+            UNSUPPORTED();
+            break;
+        }
+        break;
+    default:
+        UNSUPPORTED();
+        break;
+    }
+
+    return address;
+}
+
+word offset_reg(MELS_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    word address;
+    word offset;
+
+    switch(bits.W_A)
+    {
+    case 0b0:
+        switch(bits.P)
+        {
+        case 0b0:
+            //if (bits.RM == PC || Rm == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            address = *GP_Reg[c_m].regs[bits.Q_1];
+            if (check_Cond(bits.COND, CPSR_bits)) {
+                if (bits.U) *GP_Reg[c_m].regs[bits.Q_1] += *GP_Reg[c_m].regs[bits.Q_4];
+                else *GP_Reg[c_m].regs[bits.Q_1] -= *GP_Reg[c_m].regs[bits.Q_4];
+            }
+            break;
+        case 0b1:
+            //if (bits.RN == PC) *GP_Reg[c_m].regs[bits.RN] += 0x8; TO BE PLACED IN THE ACTUAL OPERATION
+            //if (bits.RM == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            if (bits.U) address = *GP_Reg[c_m].regs[bits.Q_1] + *GP_Reg[c_m].regs[bits.Q_4];
+            else address = *GP_Reg[c_m].regs[bits.Q_1] - *GP_Reg[c_m].regs[bits.Q_4];
+            break;
+        default:
+            UNSUPPORTED();
+            break;
+        }
+        break;
+    case 0b1:
+        switch(bits.P)
+        {
+        case 0b0:
+            break;
+        case 0b1:
+            //if (bits.RM == PC || Rm == PC) UNPREDICTABLE(); TO BE PLACED IN THE ACTUAL OPERATION
+            if (bits.U) address = *GP_Reg[c_m].regs[bits.Q_1] + *GP_Reg[c_m].regs[bits.Q_4];
+            else address = *GP_Reg[c_m].regs[bits.Q_1] - *GP_Reg[c_m].regs[bits.Q_4];
+            if (check_Cond(bits.COND, CPSR_bits)) *GP_Reg[c_m].regs[bits.Q_1] = address;
+            break;
+        default:
+            UNSUPPORTED();
+            break;
+        }
+        break;
+    default:
+        UNSUPPORTED();
+        break;
+    }
+
+    return address;
+}
