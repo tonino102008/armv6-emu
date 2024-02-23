@@ -11,7 +11,8 @@ void COPROC_Reg_ctor() {
     CP15_Reg.regs = malloc(CP15_Reg.reg_size * sizeof(word*));
     CP15_Reg.regs[ID] = calloc(8, sizeof(word));
     CP15_Reg.regs[SC_BITS] = calloc(8, sizeof(word));
-    for (COPROC_Reg_Type i = PTC; i < C_WB_C; i++) CP15_Reg.regs[i] = calloc(1, sizeof(word));
+    CP15_Reg.regs[PTC] = calloc(4, sizeof(word));
+    for (COPROC_Reg_Type i = DAC; i < C_WB_C; i++) CP15_Reg.regs[i] = calloc(1, sizeof(word));
     CP15_Reg.regs[C_WB_C] = calloc(4, sizeof(word));
     CP15_Reg.regs[TLB_C] = calloc(1, sizeof(word));
     CP15_Reg.regs[C_L] = calloc(6, sizeof(word));
