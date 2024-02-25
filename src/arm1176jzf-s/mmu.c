@@ -156,6 +156,15 @@ MMU_Physical_Address MMU_access_memory(word mva, word ASID) {
     PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
     byte E = CPSR_bits.E; // SHOULD BE LITTLE ENDIAN
     byte B = (CP15_Reg.regs[SC_BITS][0b000] >> 7) & 0b1; // SHOULD BE LITTLE ENDIAN
+    byte U = (CP15_Reg.regs[SC_BITS][0b000] >> 22) & 0b1; // SHOULD BE UNALIGNED MIXED ENDIAN
+
+    // switch(U) { // MemoryAccess(B-bit, E-bit) to detemine load/store in Little/Big Endian
+    //     switch (B) {
+    //         switch (E) {
+
+    //         }
+    //     }
+    // }
 
     MMU_Physical_Address* pa = malloc(sizeof(MMU_Physical_Address));
     MMU_TLB_search(mva, ASID, &pa);

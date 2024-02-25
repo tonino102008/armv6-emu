@@ -159,12 +159,39 @@ void LDRSH(MELS_Bitfield, word) {
     NOT_IMPLEMENTED();
 }
 
-void MLA(MELS_Bitfield, word) {
-    NOT_IMPLEMENTED();
+void MLA(MELS_Bitfield bits, word off) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_4 == PC || bits.Q_3 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        unsigned long result =  ((unsigned long) *GP_Reg[c_m].regs[bits.Q_4] *
+                                (unsigned long) *GP_Reg[c_m].regs[bits.Q_3]) +
+                                (unsigned long) *GP_Reg[c_m].regs[bits.Q_2];
+        *GP_Reg[c_m].regs[bits.Q_1] = (word)result;
+        if (bits.L_S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.Q_1] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.Q_1] == 0 ? 1 : 0;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
 }
 
-void MUL(MELS_Bitfield, word) {
-    NOT_IMPLEMENTED();
+void MUL(MELS_Bitfield bits, word off) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_4 == PC || bits.Q_3 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        unsigned long result =  ((unsigned long) *GP_Reg[c_m].regs[bits.Q_4] *
+                                (unsigned long) *GP_Reg[c_m].regs[bits.Q_3]);
+        *GP_Reg[c_m].regs[bits.Q_1] = (word)result;
+        if (bits.L_S) {
+            CPSR_bits.N = *GP_Reg[c_m].regs[bits.Q_1] >> 31;
+            CPSR_bits.Z = *GP_Reg[c_m].regs[bits.Q_1] == 0 ? 1 : 0;
+            PSR_write(*CPSR_Reg.regs, CPSR_bits);
+        }
+    }
 }
 
 void SMLAL(MELS_Bitfield, word) {

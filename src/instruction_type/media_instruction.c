@@ -15,8 +15,18 @@ MEI_Bitfield MEI_read(const word* instr) {
     return bits;
 }
 
-void PKHBT(MEI_Bitfield) {
-    NOT_IMPLEMENTED();
+void PKHBT(MEI_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        byte shift_imm = (bits.OPCODE >> 2) & 0b11111;
+        byte Rd = (bits.OPCODE >> 7) & 0xF;
+        byte Rn = (bits.OPCODE >> 11) & 0xF;
+        if (bits.Q == PC || Rd == PC || Rn == PC) UNPREDICTABLE();
+        *GP_Reg[c_m].regs[Rd] = (*GP_Reg[c_m].regs[Rn] & 0x0000FFFF) | 
+                                ((*GP_Reg[c_m].regs[bits.Q] << shift_imm) & 0xFFFF0000);
+    }
 }
 
 void PKHTB(MEI_Bitfield) {

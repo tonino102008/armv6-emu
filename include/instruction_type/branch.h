@@ -16,6 +16,5 @@ void Branch_write(word*, Branch_Bitfield);
 Branch_Bitfield Branch_read(const word*);
 
 void B_BL(Branch_Bitfield);
-void BLX(Branch_Bitfield);
 
 #endif // BRANCH_H_

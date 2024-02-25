@@ -6,7 +6,13 @@
 #include "instruction.h"
 
 void BLX(); // COND: 1111
+void CDP();
 void CPS();
+void LDC();
+void MCR();
+void MCRR();
+void MRC();
+void MRRC();
 void PLD();
 void RFE();
 void SETEND();

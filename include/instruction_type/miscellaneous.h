@@ -4,6 +4,9 @@
 #include "types.h"
 #include "register.h"
 #include "instruction.h"
+#include "exception.h"
+
+#define NO_DEBUG_HARDWARE 1
 
 typedef struct {
     unsigned int COND   : 4;
@@ -22,6 +25,7 @@ void MISC_write(word*, MISC_Bitfield);
 MISC_Bitfield MISC_read(const word*);
 
 void BKPT(MISC_Bitfield);
+void BLX(MISC_Bitfield);
 void BX(MISC_Bitfield);
 void BXJ(MISC_Bitfield);
 void CLZ(MISC_Bitfield);

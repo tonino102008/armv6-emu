@@ -15,9 +15,14 @@ Branch_Bitfield Branch_read(const word* instr) {
 }
 
 void B_BL(Branch_Bitfield bits) {
-    NOT_IMPLEMENTED();
-}
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
 
-void BLX(Branch_Bitfield) {
-    NOT_IMPLEMENTED();
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.L) *GP_Reg[c_m].regs[LR] = *GP_Reg[c_m].regs[PC] + 4;
+        word se30;
+        if (bits.OFF >> 23) se30 = bits.OFF | (0b111111 << 24);
+        else se30 = bits.OFF | (0b000000 << 24);
+        *GP_Reg[c_m].regs[PC] += se30 << 2;
+    }
 }
