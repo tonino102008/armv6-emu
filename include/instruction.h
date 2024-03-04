@@ -4,27 +4,6 @@
 #include "types.h"
 #include "register.h"
 
-#include "stdio.h"
-#include "stdlib.h"
-
-#define NOT_IMPLEMENTED()                       \
-        do {                                    \
-            printf("Not yet implemented.\n");   \
-            exit(1);                            \
-        } while(0)
-
-#define UNPREDICTABLE()                             \
-        do {                                        \
-            printf("Unpredictable operation.\n");   \
-            exit(1);                                \
-        } while(0)
-
-#define UNSUPPORTED()                           \
-        do {                                    \
-            printf("Unsupported operation.\n"); \
-            exit(1);                            \
-        } while(0)
-
 typedef enum {
     DPIS,
     MI_1,

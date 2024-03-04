@@ -1,4 +1,5 @@
 #include "miscellaneous.h"
+#include "util.h"
 
 void MISC_write(word* instr, MISC_Bitfield bits) {
     *instr =    bits.Q_5 << 0   | bits.Q_4 << 4     | bits.Q_3 << 8     | 
@@ -54,7 +55,7 @@ void BX(MISC_Bitfield bits) {
     }
 }
 
-void BXJ(MISC_Bitfield) {
+void BXJ(MISC_Bitfield bits) {
     NOT_IMPLEMENTED();
 }
 
@@ -87,42 +88,119 @@ void MRS(MISC_Bitfield bits) {
     }
 }
 
-void MSR(MISC_Bitfield) {
+void MSR(MISC_Bitfield bits) {
     NOT_IMPLEMENTED();
 }
 
-void QADD(MISC_Bitfield) {
+void QADD(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_5 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        Util_Sat_Op_Result res = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_5], 
+                                    *GP_Reg[c_m].regs[bits.Q_1], 32, ADD);
+        *GP_Reg[c_m].regs[bits.Q_2] = res.result;
+        if (res.overflow) CPSR_bits.Q = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void QDADD(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_5 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        Util_Sat_Op_Result Rn2 = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_1], 
+                                    (word)2, 32, MUL);
+        Util_Sat_Op_Result res = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_5], 
+                                    Rn2.result, 32, ADD);
+        *GP_Reg[c_m].regs[bits.Q_2] = res.result;
+        if (res.overflow || Rn2.overflow) CPSR_bits.Q = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void QDSUB(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_5 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        Util_Sat_Op_Result Rn2 = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_1], 
+                                    (word)2, 32, MUL);
+        Util_Sat_Op_Result res = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_5], 
+                                    Rn2.result, 32, SUB);
+        *GP_Reg[c_m].regs[bits.Q_2] = res.result;
+        if (res.overflow || Rn2.overflow) CPSR_bits.Q = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void QSUB(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        if (bits.Q_5 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        Util_Sat_Op_Result res = signed_saturation_op(*GP_Reg[c_m].regs[bits.Q_5], 
+                                    *GP_Reg[c_m].regs[bits.Q_1], 32, SUB);
+        *GP_Reg[c_m].regs[bits.Q_2] = res.result;
+        if (res.overflow) CPSR_bits.Q = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void SMLA(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        byte x = BIT_CHECK(bits.Q_4, 1);
+        byte y = BIT_CHECK(bits.Q_4, 2);
+        if (bits.Q_5 == PC || bits.Q_3 == PC || bits.Q_2 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        word op1;
+        if (x == 0) op1 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_5], 0x0000FFFF), 16);
+        else op1 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_5], 0xFFFF0000) >> 16, 16);
+        word op2;
+        if (y == 0) op2 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_3], 0x0000FFFF), 16);
+        else op2 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_3], 0xFFFF0000) >> 16, 16);
+        Util_Sat_Op_Result res = signed_op(op1, op2, 32, MUL);
+        Util_Sat_Op_Result res2 = signed_op(res.result, *GP_Reg[c_m].regs[bits.Q_2], 32, ADD);
+        *GP_Reg[c_m].regs[bits.Q_1] = res2.result;
+        if (res2.overflow) CPSR_bits.Q = 1;
+        PSR_write(*CPSR_Reg.regs, CPSR_bits);
+    }
+}
+
+void SMLAL(MISC_Bitfield bits) {
     NOT_IMPLEMENTED();
 }
 
-void QDADD(MISC_Bitfield) {
+void SMLAW(MISC_Bitfield bits) {
     NOT_IMPLEMENTED();
 }
 
-void QDSUB(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
+void SMUL(MISC_Bitfield bits) {
+    PSR_Bitfield CPSR_bits = PSR_read(*CPSR_Reg.regs);
+    Proc_Mode c_m = curr_Proc_Mode(CPSR_bits.M);
+
+    if (check_Cond((Cond_Field)bits.COND, CPSR_bits)) {
+        byte x = BIT_CHECK(bits.Q_4, 1);
+        byte y = BIT_CHECK(bits.Q_4, 2);
+        if (bits.Q_5 == PC || bits.Q_3 == PC || bits.Q_1 == PC) UNPREDICTABLE();
+        word op1;
+        if (x == 0) op1 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_5], 0x0000FFFF), 16);
+        else op1 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_5], 0xFFFF0000) >> 16, 16);
+        word op2;
+        if (y == 0) op2 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_3], 0x0000FFFF), 16);
+        else op2 = sign_extend(BITMASK_CHECK(*GP_Reg[c_m].regs[bits.Q_3], 0xFFFF0000) >> 16, 16);
+        Util_Sat_Op_Result res = signed_op(op1, op2, 32, MUL);
+        *GP_Reg[c_m].regs[bits.Q_1] = res.result;
+    }
 }
 
-void QSUB(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
-}
-
-void SMLA(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
-}
-
-void SMLAL(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
-}
-
-void SMLAW(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
-}
-
-void SMUL(MISC_Bitfield) {
-    NOT_IMPLEMENTED();
-}
-
-void SMULW(MISC_Bitfield) {
+void SMULW(MISC_Bitfield bits) {
     NOT_IMPLEMENTED();
 }
