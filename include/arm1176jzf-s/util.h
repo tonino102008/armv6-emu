@@ -8,7 +8,7 @@ typedef enum {
     SUB,
     MUL,
     DIV
-} Util_Sat_Op_Type;
+} Util_Op_Type;
 
 typedef struct {
     word result;
@@ -17,13 +17,13 @@ typedef struct {
 
 typedef Util_Sat_Op_Result Util_Sig_Op_Result;
 
-Util_Sat_Op_Result signed_saturation_op(word, word, byte, Util_Sat_Op_Type);
-Util_Sig_Op_Result signed_op(word, word, byte, Util_Sat_Op_Type);
-word sign_extend(word, byte);
+Util_Sat_Op_Result signed_saturation_op(word, word, byte, Util_Op_Type);
+Util_Sig_Op_Result signed_op(word, word, byte, Util_Op_Type);
+Util_Sat_Op_Result unsigned_saturation_op(word, word, byte, Util_Op_Type);
+Util_Sig_Op_Result unsigned_op(word, word, byte, Util_Op_Type);
 Util_Sat_Op_Result signed_saturation_check(word, word);
+Util_Sat_Op_Result unsigned_saturation_check(word, word);
+word sign_extend(word, byte);
 word arithmetic_shift_right(word, byte);
-
-void is_carry_op();
-void is_overflow_op();
 
 #endif // UTIL_H_
